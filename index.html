@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GSAP Cursor Image Trail Effect | Danill Kifly</title>
+
+    <link rel="icon" href="img/i.jpg" type="image/jpg" />
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+      .trail-image {
+        position: fixed;
+        pointer-events: none;
+        z-index: 1000;
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 50%;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      }
+      @media (max-width: 768px) {
+        .trail-image {
+          width: 40px;
+          height: 40px;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="container mx-auto px-4 py-8 text-center">
+      <h1 class="text-4xl md:text-6xl font-bold text-gray-800 mb-8">
+        Move Cursor to See Image Trail Effect
+      </h1>
+      <p class="text-lg md:text-xl text-gray-600">
+        Hover or tap and drag to create a trail of images.
+      </p>
+    </div>
+
+    <footer class="bottom-4 absolute">
+      <p>&copy; <span id="tahun"></span> danillkifly.</p>
+    </footer>
+
+    <script>
+      // Mengatur tahun sekarang secara otomatis
+      document.getElementById("tahun").textContent = new Date().getFullYear();
+    </script>
+
+    <script>
+      // Array of image URLs for the trail
+      const imageUrls = ["img/p.jpg", "img/q.jpg", "img/i.jpg", "img/d.jpg"];
+
+      // Array to store active trail images
+      const trailImages = [];
+      const maxImages = 5; // Maximum number of images in the trail
+
+      // Function to create a trail image
+      function createTrailImage(x, y) {
+        const img = document.createElement("img");
+        img.src = imageUrls[Math.floor(Math.random() * imageUrls.length)];
+        img.className = "trail-image";
+        img.style.left = `${x - 30}px`;
+        img.style.top = `${y - 30}px`;
+        document.body.appendChild(img);
+        trailImages.push(img);
+
+        // Animate image with GSAP
+        gsap.fromTo(
+          img,
+          { opacity: 1, scale: 0.5 },
+          {
+            opacity: 0,
+            scale: 1.2,
+            duration: 1,
+            ease: "power2.out",
+            onComplete: () => {
+              img.remove();
+              trailImages.splice(trailImages.indexOf(img), 1);
+            },
+          }
+        );
+
+        // Remove oldest image if exceeding maxImages
+        if (trailImages.length > maxImages) {
+          const oldestImg = trailImages.shift();
+          oldestImg.remove();
+        }
+      }
+
+      // Handle mouse movement
+      document.addEventListener("mousemove", (e) => {
+        createTrailImage(e.clientX, e.clientY);
+      });
+
+      // Handle touch movement for mobile
+      document.addEventListener(
+        "touchmove",
+        (e) => {
+          e.preventDefault(); // Prevent scrolling
+          const touch = e.touches[0];
+          createTrailImage(touch.clientX, touch.clientY - 20); // Adjust for touch offset
+        },
+        { passive: false }
+      );
+
+      // Handle touch start for mobile
+      document.addEventListener(
+        "touchstart",
+        (e) => {
+          const touch = e.touches[0];
+          createTrailImage(touch.clientX, touch.clientY - 20);
+        },
+        { passive: false }
+      );
+    </script>
+  </body>
+</html>
